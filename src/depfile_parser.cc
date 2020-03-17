@@ -52,6 +52,8 @@ bool DepfileParser::Parse(string* content, string* err) {
   bool have_target = false;
   bool parsing_targets = true;
   bool poisoned_input = false;
+  unsigned total_lines = 0;
+  unsigned dos_line_endings = 0;
   while (in < end) {
     bool have_newline = false;
     // out: current output point (typically same as in, but can fall behind
@@ -139,6 +141,8 @@ yy6:
       {
         // A newline ends the current file name and the current rule.
         have_newline = true;
+        total_lines++;
+        dos_line_endings += (start[0] == '\r');
         break;
       }
 yy8:
@@ -199,6 +203,8 @@ yy17:
       ++in;
       {
         // A line continuation ends the current file name.
+        total_lines++;
+        dos_line_endings += (start[1] == '\r');
         break;
       }
 yy19:
@@ -325,6 +331,13 @@ yy28:
   if (!have_target) {
     *err = "expected ':' in depfile";
     return false;
+  }
+  if (dos_line_endings == total_lines) {
+    line_endings_ = kLineDos;
+  } else if (dos_line_endings > 0) {
+    line_endings_ = kLineMixed;
+  } else {
+    line_endings_ = kLineUnix;
   }
   return true;
 }

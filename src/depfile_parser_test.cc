@@ -72,6 +72,49 @@ TEST_F(DepfileParserTest, CarriageReturnContinuation) {
   EXPECT_EQ(2u, parser_.ins_.size());
 }
 
+TEST_F(DepfileParserTest, SingleLineEndings) {
+  string err;
+  EXPECT_TRUE(Parse(
+"foo.o:\n"
+"  bar.h \\\n"
+"  bar.c",
+      &err));
+  ASSERT_EQ("", err);
+  EXPECT_EQ(DepfileParser::kLineUnix, parser_.line_endings_);
+}
+
+TEST_F(DepfileParserTest, UnixLineEndings) {
+  string err;
+  EXPECT_TRUE(Parse(
+"foo.o:\n"
+"  bar.h\n",
+      &err));
+  ASSERT_EQ("", err);
+  EXPECT_EQ(DepfileParser::kLineUnix, parser_.line_endings_);
+}
+
+TEST_F(DepfileParserTest, DosLineEndings) {
+  string err;
+  EXPECT_TRUE(Parse(
+"foo.o:\r\n"
+"  bar.h \\\r\n"
+"  bar.c",
+      &err));
+  ASSERT_EQ("", err);
+  EXPECT_EQ(DepfileParser::kLineDos, parser_.line_endings_);
+}
+
+TEST_F(DepfileParserTest, MixedLineEndings) {
+  string err;
+  EXPECT_TRUE(Parse(
+"foo.o:\r\n"
+"  bar.h \\\n"
+"  bar.c",
+      &err));
+  ASSERT_EQ("", err);
+  EXPECT_EQ(DepfileParser::kLineMixed, parser_.line_endings_);
+}
+
 TEST_F(DepfileParserTest, BackSlashes) {
   string err;
   EXPECT_TRUE(Parse(

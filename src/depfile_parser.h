@@ -38,6 +38,14 @@ struct DepfileParser {
   std::vector<StringPiece> outs_;
   vector<StringPiece> ins_;
   DepfileParserOptions options_;
+
+  enum LineEndings {
+    kLineUnix,
+    kLineDos,
+    kLineMixed
+  };
+
+  LineEndings line_endings_;
 };
 
 #endif // NINJA_DEPFILE_PARSER_H_
