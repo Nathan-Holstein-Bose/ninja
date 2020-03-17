@@ -210,6 +210,20 @@ bool CanonicalizePath(char* path, size_t* len, uint64_t* slash_bits,
   return true;
 }
 
+void ConvertPathSeparators(StringPiece& path) {
+  // ooh... this is ugly. Proof of concept only!
+  char* str = const_cast<char*>(path.str_);
+  for (size_t i = 0; i < path.size(); ++i) {
+#ifdef _WIN32
+    if (str[i] == '/')
+      str[i] = '\\';
+#else
+    if (str[i] == '\\')
+      str[i] = '/';
+#endif
+  }
+}
+
 static inline bool IsKnownShellSafeCharacter(char ch) {
   if ('A' <= ch && ch <= 'Z') return true;
   if ('a' <= ch && ch <= 'z') return true;

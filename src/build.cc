@@ -1053,6 +1053,12 @@ bool Builder::ExtractDeps(CommandRunner::Result* result,
                           const string& deps_prefix,
                           vector<Node*>* deps_nodes,
                           string* err) {
+#ifdef _WIN32
+  static const DepfileParser::LineEndings convert_line_endings_if = DepfileParser::kLineUnix;
+#else
+  static const DepfileParser::LineEndings convert_line_endings_if = DepfileParser::kLineDos;
+#endif
+
   if (deps_type == "msvc") {
     CLParser parser;
     string output;
@@ -1092,6 +1098,15 @@ bool Builder::ExtractDeps(CommandRunner::Result* result,
     DepfileParser deps(config_.depfile_parser_options);
     if (!deps.Parse(&content, err))
       return false;
+
+    EXPLAIN("%s %d %d", depfile.c_str(), convert_line_endings_if, deps.line_endings_);
+    if (convert_line_endings_if == deps.line_endings_) {
+      EXPLAIN("converting paths of: '%s'", depfile.c_str());
+      for (std::vector<StringPiece>::iterator i = deps.ins_.begin();
+           i != deps.ins_.end(); ++i) {
+        ConvertPathSeparators(*i);
+      }
+    }
 
     // XXX check depfile matches expected output.
     deps_nodes->reserve(deps.ins_.size());

@@ -368,6 +368,23 @@ TEST(CanonicalizePath, NotNullTerminated) {
   EXPECT_EQ("file ./file bar/.", string(path));
 }
 
+// TODO: this is about as hacky as the implementation.
+#ifndef _WIN32
+TEST(ConvertPathSeparators, NopPaths) {
+  string input = "/foo/bar/baz/";
+  StringPiece piece(input);
+  ::ConvertPathSeparators(piece);
+  EXPECT_EQ("/foo/bar/baz/", piece.AsString());
+}
+
+TEST(ConvertPathSeparators, WinPaths) {
+  string input = "..\\foo\\bar\\baz\\";
+  StringPiece piece(input);
+  ::ConvertPathSeparators(piece);
+  EXPECT_EQ("../foo/bar/baz/", piece.AsString());
+}
+#endif
+
 TEST(PathEscaping, TortureTest) {
   string result;
 

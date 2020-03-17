@@ -25,6 +25,8 @@
 #include <vector>
 using namespace std;
 
+#include "string_piece.h"
+
 #ifdef _MSC_VER
 #define NORETURN __declspec(noreturn)
 #else
@@ -60,6 +62,10 @@ void Error(const char* msg, ...);
 bool CanonicalizePath(string* path, uint64_t* slash_bits, string* err);
 bool CanonicalizePath(char* path, size_t* len, uint64_t* slash_bits,
                       string* err);
+
+/// Convert the directory separators in a path the native path separator.
+/// This modifies |path| in place.
+void ConvertPathSeparators(StringPiece &path);
 
 /// Appends |input| to |*result|, escaping according to the whims of either
 /// Bash, or Win32's CommandLineToArgvW().
